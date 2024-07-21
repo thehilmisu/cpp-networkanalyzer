@@ -35,6 +35,7 @@ PacketParser::PacketParser() : filterSrcIp(""), filterDstIp("")
     };
 }
 
+
 void PacketParser::setFilter(const std::string& srcIp, const std::string& dstIp) 
 {
     filterSrcIp = srcIp;

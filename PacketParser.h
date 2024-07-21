@@ -18,9 +18,11 @@ struct PcapFile
     std::vector<unsigned char> data;
 };
 
-class PacketParser {
+class PacketParser 
+{
 public:
     PacketParser();
+    virtual ~PacketParser() = default;
     void setFilter(const std::string& srcIp, const std::string& dstIp);
     bool isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const;
     PcapFile parse(const unsigned char* packet, std::size_t length);

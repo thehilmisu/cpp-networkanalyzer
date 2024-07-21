@@ -7,10 +7,6 @@
 #include <condition_variable>
 #include <iostream>
 
-std::queue<std::pair<const u_char*, std::size_t>> packetQueue;
-std::mutex queueMutex;
-std::condition_variable queueCondVar;
-bool done = false;
 
 // Packet handler function for libpcap
 void packetHandler(u_char *userData, const struct pcap_pkthdr *pkthdr, const u_char *packet) 
