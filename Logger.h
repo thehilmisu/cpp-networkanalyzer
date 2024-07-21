@@ -9,40 +9,20 @@
 class Logger 
 {
 public:
-    static Logger& getInstance() 
-    {
-        static Logger instance;
-        return instance;
-    }
-
-    void log(const unsigned char* packet, std::size_t length) 
-    {
-        std::lock_guard<std::mutex> lock(mtx);
-        if (fileStream.is_open()) {
-            fileStream.write(reinterpret_cast<const char*>(packet), length);
-        }
-    }
-
-    void setLogFile(const std::string& filename) 
-    {
-        fileStream.open(filename, std::ios::binary | std::ios::app);
-    }
+    static Logger* getInstance();
+    void log(const unsigned char* packet, std::size_t length);
+    void setLogFile(const std::string& filename);
 
 private:
     Logger() = default;
-    ~Logger() 
-    {
-        if (fileStream.is_open()) {
-            fileStream.close();
-        }
-    }
-
-    std::ofstream fileStream;
-    std::mutex mtx;
-
+    ~Logger();
     // Delete copy constructor and assignment operator
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
+
+    static Logger *instance;
+    std::ofstream fileStream;
+    std::mutex mtx;
 };
 
 #endif // LOGGER_H
