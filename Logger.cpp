@@ -10,7 +10,8 @@ Logger& Logger::getInstance()
 
 Logger::~Logger() 
 {
-    if (fileStream.is_open()) {
+    if (fileStream.is_open()) 
+    {
         fileStream.close();
     }
 }
@@ -18,7 +19,8 @@ Logger::~Logger()
 void Logger::log(const unsigned char* packet, std::size_t length) 
 {
     std::lock_guard<std::mutex> lock(mtx);
-    if (fileStream.is_open()) {
+    if (fileStream.is_open()) 
+    {
         fileStream.write(reinterpret_cast<const char*>(packet), length);
     }
 }
