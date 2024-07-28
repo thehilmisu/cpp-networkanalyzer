@@ -1,5 +1,5 @@
-#ifndef PACKETPARSER_H
-#define PACKETPARSER_H
+#ifndef PCAPINTERPRETER_H
+#define PCAPINTERPRETER_H
 
 #include <string>
 #include <iostream>
@@ -18,14 +18,14 @@ struct PcapFile
     std::vector<unsigned char> data;
 };
 
-class PacketParser 
+class PcapInterpreter 
 {
 public:
-    PacketParser();
-    virtual ~PacketParser() = default;
+    PcapInterpreter();
+    virtual ~PcapInterpreter() = default;
     void setFilter(const std::string& srcIp, const std::string& dstIp);
     bool isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const;
-    PcapFile parse(const unsigned char* packet, std::size_t length);
+    PcapFile interpret(const unsigned char* packet, std::size_t length);
     // Define the lookup table for IP protocol numbers
     std::unordered_map<int, std::string> ipProtocolNumbers;    
     std::string getProtocolName(int protocol_number);
@@ -36,4 +36,4 @@ private:
     std::string filterDstIp;
 };
 
-#endif // PACKETPARSER_H
+#endif // PCAPINTERPRETER_H

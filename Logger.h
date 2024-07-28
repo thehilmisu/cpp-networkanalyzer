@@ -16,7 +16,6 @@ public:
 private:
     Logger() = default;
     ~Logger();
-    // Delete copy constructor and assignment operator
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 

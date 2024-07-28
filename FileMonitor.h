@@ -2,7 +2,7 @@
 #define FILEMONITOR_H
 
 #include "Monitor.h"
-#include "PacketParser.h"
+#include "PcapInterpreter.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -16,15 +16,13 @@ public:
         : filename(filename), filePosition(0) {}
 
     void setPacketFilter(const std::string& srcIp, const std::string& dstIp);
-    void monitor(const unsigned char* packet, std::size_t length) override ;
-    void process(); 
+    void monitor() override ;
 
 private:
-    void processBuffer(const unsigned char* buffer, std::size_t length);
-
+    void print(const unsigned char* buffer, std::size_t length);
     std::string filename;
     std::streampos filePosition;
-    PacketParser parser;
+    PcapInterpreter interpreter;
 };
 
 #endif // FILEMONITOR_H

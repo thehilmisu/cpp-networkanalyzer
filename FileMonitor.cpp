@@ -2,15 +2,10 @@
 
 void FileMonitor::setPacketFilter(const std::string& srcIp, const std::string& dstIp)
 {
-    parser.setFilter(srcIp, dstIp);
+    interpreter.setFilter(srcIp, dstIp);
 }
 
-void FileMonitor::monitor(const unsigned char* packet, std::size_t length)  
-{
-        // This method is not used in this version since processing is done in `process()`
-}
-
-void FileMonitor::process()
+void FileMonitor::monitor()  
 {
     while (true) 
     {
@@ -27,7 +22,7 @@ void FileMonitor::process()
             std::vector<unsigned char> buffer(static_cast<std::size_t>(currentSize - filePosition));
             fileStream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
             filePosition = fileStream.tellg();
-            processBuffer(buffer.data(), buffer.size());
+            print(buffer.data(), buffer.size());
         }
 
         fileStream.close();
@@ -37,17 +32,17 @@ void FileMonitor::process()
     }
 }
 
-void FileMonitor::processBuffer(const unsigned char* buffer, std::size_t length) 
+void FileMonitor::print(const unsigned char* buffer, std::size_t length) 
 {
-        PcapFile parsedPacket = parser.parse(buffer, length);
+        PcapFile parsedPacket = interpreter.interpret(buffer, length);
         
-        bool isMatch = parser.isMatchedFilter(parsedPacket.srcIp, parsedPacket.dstIp);
+        bool isMatch = interpreter.isMatchedFilter(parsedPacket.srcIp, parsedPacket.dstIp);
 
         std::ostringstream oss;
         oss << (isMatch ? "[MATCH] " : "[NO MATCH] ")
             << "<Source IP: " << parsedPacket.srcIp << "> "
             << "<Destination IP: " << parsedPacket.dstIp << "> "
-            << "<Protocol: " << parser.getProtocolName(static_cast<int>(parsedPacket.protocol)) << "> "
+            << "<Protocol: " << interpreter.getProtocolName(static_cast<int>(parsedPacket.protocol)) << "> "
             << "<Length: " << parsedPacket.length << "> " ;
         //     << "<Data: ";
 
@@ -61,4 +56,4 @@ void FileMonitor::processBuffer(const unsigned char* buffer, std::size_t length)
         oss << ">";
 
         std::cout << oss.str() << std::endl;
-    }
+}

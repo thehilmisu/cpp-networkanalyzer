@@ -1,6 +1,6 @@
-#include "PacketParser.h"
+#include "PcapInterpreter.h"
 
-PacketParser::PacketParser() : filterSrcIp(""), filterDstIp("") 
+PcapInterpreter::PcapInterpreter() : filterSrcIp(""), filterDstIp("") 
 {
     ipProtocolNumbers = {
         {0, "HOPOPT"},       // IPv6 Hop-by-Hop Option
@@ -36,20 +36,20 @@ PacketParser::PacketParser() : filterSrcIp(""), filterDstIp("")
 }
 
 
-void PacketParser::setFilter(const std::string& srcIp, const std::string& dstIp) 
+void PcapInterpreter::setFilter(const std::string& srcIp, const std::string& dstIp) 
 {
     filterSrcIp = srcIp;
     filterDstIp = dstIp;
 }
 
-bool PacketParser::isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const 
+bool PcapInterpreter::isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const 
 {
     bool srcMatch = filterSrcIp.empty() || filterSrcIp == srcIp;
     bool dstMatch = filterDstIp.empty() || filterDstIp == dstIp;
     return srcMatch && dstMatch;
 }
 
-std::string PacketParser::getProtocolName(int protocol_number) 
+std::string PcapInterpreter::getProtocolName(int protocol_number) 
 {
     std::cout << protocol_number << std::endl;
     auto it = ipProtocolNumbers.find(protocol_number);
@@ -59,7 +59,7 @@ std::string PacketParser::getProtocolName(int protocol_number)
     return "Unknown Protocol";
 }
     
-PcapFile PacketParser::parse(const unsigned char* packet, std::size_t length) 
+PcapFile PcapInterpreter::interpret(const unsigned char* packet, std::size_t length) 
 {
     PcapFile parsedPacket;
     const struct ip* ipHeader = reinterpret_cast<const struct ip*>(packet);

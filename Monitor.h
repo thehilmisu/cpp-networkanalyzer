@@ -6,7 +6,7 @@
 class Monitor 
 {
 public:
-    virtual void monitor(const unsigned char* packet, std::size_t length) = 0;
+    virtual void monitor() = 0;
     virtual ~Monitor() = default;
 };
 

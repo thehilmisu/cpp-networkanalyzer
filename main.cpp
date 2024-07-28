@@ -45,7 +45,7 @@ int main()
     // Start the capture thread
     std::thread captureThreadObj(captureThread, dev);
     // Start the monitoring thread
-    std::thread monitoringThreadObj([&] { fileMonitor.process(); });
+    std::thread monitoringThreadObj([&] { fileMonitor.monitor(); });
 
     // Wait for both threads to complete
     captureThreadObj.join();
