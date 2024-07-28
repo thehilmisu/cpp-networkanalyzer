@@ -6,6 +6,63 @@
 #include <queue>
 #include <condition_variable>
 #include <iostream>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <vector>
+
+std::string chooseNetworkDevice() 
+{
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+    char host[NI_MAXHOST];
+    std::vector<std::string> devices;
+    
+    if (getifaddrs(&ifaddr) == -1) {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Available network interfaces:" << std::endl;
+    int index = 1;
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        family = ifa->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {
+            s = getnameinfo(ifa->ifa_addr,
+                            (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                                  sizeof(struct sockaddr_in6),
+                            host, NI_MAXHOST,
+                            NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                std::cout << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+                continue;
+            }
+
+            std::string deviceName = ifa->ifa_name;
+            std::cout << index << ": " << deviceName << " (" << host << ")" << std::endl;
+            devices.push_back(deviceName);
+            index++;
+        }
+    }
+    freeifaddrs(ifaddr);
+
+    int choice;
+    std::cout << "Enter the number of the device you want to use: ";
+    std::cin >> choice;
+    std::cout << "------------------------------------------------" << std::endl;
+
+    // Validate the input
+    while (std::cin.fail() || choice < 1 || choice > devices.size()) {
+        std::cin.clear(); // clear error flag
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore last input
+        std::cout << "Invalid selection. Please enter a number between 1 and " << devices.size() << ": ";
+        std::cin >> choice;
+    }
+
+    return devices[choice - 1]; // return the selected device name
+}
 
 
 // Packet handler function for libpcap
@@ -30,7 +87,8 @@ void captureThread(const char* dev)
 
 int main() 
 {
-    const char* dev = "wlp4s0"; // Replace with your network device name
+
+    std::string dev = chooseNetworkDevice();
     const std::string filename = "packets.pcap";
 
     // Set up logging
@@ -38,18 +96,14 @@ int main()
 
     // Set up monitoring
     FileMonitor fileMonitor(filename);
+    fileMonitor.setPacketFilter("192.168.1.1", "192.168.1.2");
 
-    // Set filters for packets
-    fileMonitor.setPacketFilter("192.168.1.1", "192.168.1.2"); // Replace with desired IP addresses
-
-    // Start the capture thread
-    std::thread captureThreadObj(captureThread, dev);
-    // Start the monitoring thread
+    // Start threads
+    std::thread captureThreadObj([&] { captureThread(dev.c_str()); });
     std::thread monitoringThreadObj([&] { fileMonitor.monitor(); });
 
     // Wait for both threads to complete
     captureThreadObj.join();
     monitoringThreadObj.join();
 
-    return 0;
 }
