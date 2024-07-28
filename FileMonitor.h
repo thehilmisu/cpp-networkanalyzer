@@ -10,7 +10,8 @@
 #include <thread>
 #include <chrono>
 
-class FileMonitor : public Monitor {
+class FileMonitor : public Monitor 
+{
 public:
     FileMonitor(const std::string& filename)
         : filename(filename), filePosition(0) {}

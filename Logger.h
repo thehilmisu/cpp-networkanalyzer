@@ -9,7 +9,7 @@
 class Logger 
 {
 public:
-    static Logger* getInstance();
+    static Logger& getInstance();
     void log(const unsigned char* packet, std::size_t length);
     void setLogFile(const std::string& filename);
 

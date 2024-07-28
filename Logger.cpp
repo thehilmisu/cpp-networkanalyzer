@@ -1,12 +1,9 @@
 #include "Logger.h"
 
 
-Logger* Logger::instance{nullptr};
-
-Logger* Logger::getInstance() 
+Logger& Logger::getInstance() 
 {
-    if(instance == nullptr)
-        instance = new Logger();
+    static Logger instance;
 
     return instance;
 }
