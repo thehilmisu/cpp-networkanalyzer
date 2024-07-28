@@ -51,7 +51,7 @@ bool PcapInterpreter::isMatchedFilter(const std::string& srcIp, const std::strin
 
 std::string PcapInterpreter::getProtocolName(int protocol_number) 
 {
-    std::cout << protocol_number << std::endl;
+    //std::cout << protocol_number << std::endl;
     auto it = ipProtocolNumbers.find(protocol_number);
     if (it != ipProtocolNumbers.end()) 
         return it->second;
