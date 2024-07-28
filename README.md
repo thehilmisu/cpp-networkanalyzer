@@ -1,6 +1,7 @@
 # cpp-networkanalyzer
 simple tool to analyze network packages (pcap files)
 
+## class diagram
 
 +---------------------------------------------------------------+
 |                           <<abstract>>                        |
