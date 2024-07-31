@@ -2,21 +2,19 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 LDFLAGS = -lpcap
 
-# Directories
 BUILD_DIR = build
-
-# Ensure build directory exists
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
 
 OBJ := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
 TARGET = $(BUILD_DIR)/network_analyzer
 
 all: ${OBJ}
+	mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) *.o $(LDFLAGS) -o $(TARGET)
+	mv *.o build/
 
 clean:
 	rm -f $(BUILD_DIR)/*.o $(TARGET) *.o *.pcap
+	rm -Rf build
 
 .PHONY: all clean
