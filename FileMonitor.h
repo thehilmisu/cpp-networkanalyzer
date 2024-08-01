@@ -2,13 +2,14 @@
 #define FILEMONITOR_H
 
 #include "Monitor.h"
-#include "PcapInterpreter.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <thread>
 #include <chrono>
+#include "PcapInterpreter.h"
+#include "ConsoleHandler.h"
 
 class FileMonitor : public Monitor 
 {

@@ -31,19 +31,14 @@ std::string NetworkDeviceFinder::chooseDevice()
 
     for (size_t i = 0; i < devices.size(); ++i) 
     {
-        std::cout << "[" << (i + 1) << "] " << devices[i] << std::endl;
+        ConsoleHandler::getInstance().print("[" + std::to_string(i + 1) + "] " + devices[i] );
     }
 
-    int choice;
-    std::cout << "Enter the number of the device you want to use: ";
-    std::cin >> choice;
-    
-    while (std::cin.fail() || choice < 1 || choice > devices.size()) 
+    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: "));
+
+    while (choice < 1 || choice > devices.size()) 
     {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid selection. Please enter a number between 1 and " << devices.size() << ": ";
-        std::cin >> choice;
+        choice = std::stoi(ConsoleHandler::getInstance().input("Invalid selection! Please enter a number between 1 and " + std::to_string(devices.size()) + " \n"));
     }
 
     return devices[choice - 1];
@@ -59,23 +54,29 @@ std::vector<std::string> NetworkDeviceFinder::listDevices()
         ULONG outBufLen = 15000; // Set an initial buffer size.
         DWORD dwRetVal = 0;
 
-        do {
+        do 
+        {
             addresses = (IP_ADAPTER_ADDRESSES*) new char[outBufLen];
             dwRetVal = GetAdaptersAddresses(family, flags, nullptr, addresses, &outBufLen);
-            if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
+            if (dwRetVal == ERROR_BUFFER_OVERFLOW) 
+            {
                 delete[] addresses;
                 addresses = nullptr;
-            } else {
+            } 
+            else 
+            {
                 break;
             }
         } while ((dwRetVal == ERROR_BUFFER_OVERFLOW));
 
-        if (dwRetVal == NO_ERROR) {
+        if (dwRetVal == NO_ERROR) 
+        {
             for (outAddresses = addresses; outAddresses != nullptr; outAddresses = outAddresses->Next) {
                 devices.push_back(std::string(outAddresses->AdapterName));
             }
         }
-        if (addresses) {
+        if (addresses) 
+        {
             delete[] addresses;
         }
     #else

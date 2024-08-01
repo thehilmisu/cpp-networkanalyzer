@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include "ConsoleHandler.h"
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <winsock2.h>

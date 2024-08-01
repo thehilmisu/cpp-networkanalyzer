@@ -22,7 +22,12 @@ void FileMonitor::monitor()
             std::vector<unsigned char> buffer(static_cast<std::size_t>(currentSize - filePosition));
             fileStream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
             filePosition = fileStream.tellg();
-            print(buffer.data(), buffer.size());
+
+            PcapFile parsedPacket = interpreter.interpret(buffer.data(), buffer.size());
+        
+            bool isMatch = interpreter.isMatchedFilter(parsedPacket.srcIp, parsedPacket.dstIp);
+
+            ConsoleHandler::getInstance().printPackets(interpreter, parsedPacket, isMatch);
         }
 
         fileStream.close();
@@ -30,30 +35,4 @@ void FileMonitor::monitor()
         // Short sleep to prevent busy waiting
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-}
-
-void FileMonitor::print(const unsigned char* buffer, std::size_t length) 
-{
-        PcapFile parsedPacket = interpreter.interpret(buffer, length);
-        
-        bool isMatch = interpreter.isMatchedFilter(parsedPacket.srcIp, parsedPacket.dstIp);
-
-        std::ostringstream oss;
-        oss << (isMatch ? "[MATCH] " : "[NO MATCH] ")
-            << "<Source IP: " << parsedPacket.srcIp << "> "
-            << "<Destination IP: " << parsedPacket.dstIp << "> "
-            << "<Protocol: " << interpreter.getProtocolName(static_cast<int>(parsedPacket.protocol)) << "> "
-            << "<Length: " << parsedPacket.length << "> " ;
-        //     << "<Data: ";
-
-        // for (const auto& byte : parsedPacket.data) {
-        //     if (std::isprint(byte)) {
-        //         oss << byte;
-        //     } else {
-        //         oss << '.';
-        //     }
-        // }
-        oss << ">";
-
-        std::cout << oss.str() << std::endl;
 }
