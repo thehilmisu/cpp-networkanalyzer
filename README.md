@@ -5,9 +5,9 @@ Platform independent, lists your network devices to analyze network packages
 Tested on ubuntu and mac os. Should work on windows but did not test on that. 
 
 To compile
-    = make all =
+    == make all ==
 To clean
-    = make clean = 
+    == make clean == 
 
 ## class diagram.
 
