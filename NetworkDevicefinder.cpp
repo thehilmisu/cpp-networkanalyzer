@@ -81,11 +81,13 @@ std::vector<std::string> NetworkDeviceFinder::listDevices()
         }
     #else
         struct ifaddrs *ifaddr, *ifa;
+
         if (getifaddrs(&ifaddr) == -1) 
         {
             perror("getifaddrs");
             exit(EXIT_FAILURE);
         }
+
         for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
         {
             if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_PACKET) 
@@ -93,7 +95,9 @@ std::vector<std::string> NetworkDeviceFinder::listDevices()
                 devices.push_back(ifa->ifa_name);
             }
         }
+
         freeifaddrs(ifaddr);
+        
     #endif
 
     return devices;
