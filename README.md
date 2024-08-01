@@ -19,117 +19,60 @@ To clean
      
     ``` 
 
-## class diagram.
+## class diagram
 
-```
-+-----------------------------------------+
-|                Logger                   |
-+-----------------------------------------+
-| - fileStream: std::ofstream             |
-| - mtx: std::mutex                       |
-+-----------------------------------------+
-| + getInstance() : Logger&               |
-| + log(packet: const unsigned char*,     |
-|        length: std::size_t)             |
-| + setLogFile(filename: std::string)     |
-+-----------------------------------------+
-| <<singleton>>                           |
-+-----------------------------------------+
-                ^
-                |
-                |
-                |
-+-----------------------------------------+
-|              FileMonitor                |
-+-----------------------------------------+
-| - filename: std::string                 |
-| - filePosition: std::streampos          |
-| - interpreter: PcapInterpreter          |
-+-----------------------------------------+
-| + FileMonitor(filename: std::string)    |
-| + setPacketFilter(srcIP: std::string,   |
-|        dstIP: std::string)              |
-| + monitor()                             |
-| - print(buffer: const unsigned char*,   |
-|        length: std::size_t)             |
-+-----------------------------------------+
-| <<inherits>>                            |
-| Monitor                                 |
-| <<uses>>                                |
-| PcapInterpreter, ConsoleHandler         |
-+-----------------------------------------+
-                |
-                | uses
-                v
-+------------------------------------------+
-|            PcapInterpreter               |
-+------------------------------------------+
-| - filterSrcIp: std::string               |
-| - filterDstIp: std::string               |
-| - ipProtocolNumbers:                     |
-|    std::unordered_map<int, std::string>  |
-+------------------------------------------+
-| + PcapInterpreter()                      |
-| + setFilter(srcIp: std::string, dstIp:   |
-|        std::string)                      |
-| + isMatchedFilter(srcIp: std::string,    |
-|        dstIp: std::string) const         |
-| + interpret(packet: const unsigned char*,|
-|        length: std::size_t) : PcapFile   |
-| + getProtocolName(protocol_number: int): |
-|        std::string                       |
-+------------------------------------------+
-                ^
-                |
-                |
-                | uses
-                v
-+-----------------------------------------------+
-|            ConsoleHandler                     |
-+-----------------------------------------------+
-| + getInstance() : ConsoleHandler&             |
-| + print(message: std::string)                 |
-| + printPackets(interpreter: PcapInterpreter,  |
-|        parsedPacket: PcapFile, isMatch: bool) |
-| + input(prompt: std::string)                  |
-+-----------------------------------------------+
-| <<uses>>                                      |
-| PcapFile                                      |
-+-----------------------------------------------+
-                |
-                | uses
-                v
-+-----------------------------------------+
-|               PcapFile                  |
-+-----------------------------------------+
-| - srcIp: std::string                    |
-| - dstIp: std::string                    |
-| - protocol: uint8_t                     |
-| - length: std::size_t                   |
-| - data: std::vector<unsigned char>      |
-+-----------------------------------------+
+```mermaid
+classDiagram
+    class FileMonitor {
+        - filename: std::string
+        - filePosition: std::streampos
+        - interpreter: PcapInterpreter
+        + FileMonitor(filename: std::string)
+        + setPacketFilter(srcIP: std::string, dstIP: std::string)
+        + monitor()
+        - print(buffer: const unsigned char*, length: std::size_t)
+    }
+    
+    class Monitor {
+        <<abstract>>
+        + monitor()
+    }
+    
+    class PcapInterpreter {
+        - filterSrcIp: std::string
+        - filterDstIp: std::string
+        - ipProtocolNumbers: std::unordered_map<int, std::string>
+        + PcapInterpreter()
+        + setFilter(srcIp: std::string, dstIp: std::string)
+        + isMatchedFilter(srcIp: std::string, dstIp: std::string) const
+        + interpret(packet: const unsigned char*, length: std::size_t) : PcapFile
+        + getProtocolName(protocol_number: int): std::string
+    }
+    
+    class ConsoleHandler {
+        <<singleton>>
+        + getInstance() : ConsoleHandler&
+        + print(message: std::string)
+        + printPackets(interpreter: PcapInterpreter, parsedPacket: PcapFile, isMatch: bool)
+        + input(prompt: std::string)
+    }
+    
+    class PcapFile {
+        - srcIp: std::string
+        - dstIp: std::string
+        - protocol: uint8_t
+        - length: std::size_t
+        - data: std::vector<unsigned char>
+    }
 
-+-----------------------------------------+
-|                Monitor                  |
-+-----------------------------------------+
-| + monitor() = 0                         |
-| + ~Monitor()                            |
-+-----------------------------------------+
-| <<abstract>>                            |
-+-----------------------------------------+
+    %% Inheritance
+    FileMonitor --|> Monitor : <<inherits>>
 
-+-------------------------------------------+
-|         NetworkDeviceFinder               |
-+-------------------------------------------+
-| - listDevices(): std::vector<std::string> |
-+-------------------------------------------+
-| + getInstance() : NetworkDeviceFinder&    |
-| + chooseDevice() : std::string            |
-+-------------------------------------------+
-| <<singleton>>                             |
-| <<uses>>                                  |
-| ConsoleHandler                            |
-+-------------------------------------------+
+    %% Usage relationships
+    FileMonitor ..> PcapInterpreter : uses
+    FileMonitor ..> ConsoleHandler : uses
+    PcapInterpreter ..> PcapFile : returns/uses
+    ConsoleHandler ..> PcapFile : uses
 
 
 ```
