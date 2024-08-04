@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "ConsoleHandler.h"
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <winsock2.h>

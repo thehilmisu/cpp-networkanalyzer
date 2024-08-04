@@ -5,12 +5,14 @@
     NetworkDeviceFinder::NetworkDeviceFinder() {}
     NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
+    {
         static NetworkDeviceFinder instance;
         return instance;
     }
 
-    std::vector<std::string> NetworkDeviceFinder::listDevices() {
+    std::vector<std::string> NetworkDeviceFinder::listDevices() 
+    {
         std::vector<std::string> devices;
         ULONG bufferSize = 15000;
         PIP_ADAPTER_ADDRESSES pAddresses = (IP_ADAPTER_ADDRESSES*)malloc(bufferSize);
@@ -38,12 +40,14 @@
     NetworkDeviceFinder::NetworkDeviceFinder() {}
     NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
+    {
         static NetworkDeviceFinder instance;
         return instance;
     }
 
-    std::vector<std::string> NetworkDeviceFinder::listDevices() {
+    std::vector<std::string> NetworkDeviceFinder::listDevices() 
+    {
         std::vector<std::string> devices;
         struct ifaddrs *ifaddr, *ifa;
 
@@ -69,21 +73,25 @@
     NetworkDeviceFinder::NetworkDeviceFinder() {}
     NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
+    {
         static NetworkDeviceFinder instance;
         return instance;
     }
 
-    std::vector<std::string> NetworkDeviceFinder::listDevices() {
+    std::vector<std::string> NetworkDeviceFinder::listDevices() 
+    {
         std::vector<std::string> devices;
         struct ifaddrs *ifaddr, *ifa;
 
-        if (getifaddrs(&ifaddr) == -1) {
+        if (getifaddrs(&ifaddr) == -1) 
+        {
             perror("getifaddrs");
             return devices;
         }
 
-        for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) 
+        {
             if (ifa->ifa_addr == nullptr) continue;
 
             if (ifa->ifa_addr->sa_family == AF_INET) { // Check for IPv4
@@ -97,24 +105,28 @@
 
 #endif
 
-std::string NetworkDeviceFinder::chooseDevice() {
+std::string NetworkDeviceFinder::chooseDevice() 
+{
     std::vector<std::string> devices = listDevices();
-    if (devices.empty()) {
+    if (devices.empty()) 
+    {
+        ConsoleHandler::getInstance().print("Cannot find any network devices...\n");
         return "";
     }
 
-    std::cout << "Available network devices:\n";
-    for (size_t i = 0; i < devices.size(); ++i) {
-        std::cout << i + 1 << ". " << devices[i] << "\n";
+    ConsoleHandler::getInstance().print("Available network devices:\n");
+    for (size_t i = 0; i < devices.size(); ++i) 
+    {
+        ConsoleHandler::getInstance().print("[" + std::to_string(i+1) + "] " + devices[i]);
     }
 
-    std::cout << "Choose a device (1-" << devices.size() << "): ";
-    size_t choice;
-    std::cin >> choice;
+    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: \n"));
 
-    if (choice < 1 || choice > devices.size()) {
-        return "";
+    while (choice < 1 || choice > devices.size()) 
+    {
+        choice = std::stoi(ConsoleHandler::getInstance().input("Invalid selection! Please enter a number between 1 and " + std::to_string(devices.size()) + " \n"));
     }
 
     return devices[choice - 1];
+
 }
