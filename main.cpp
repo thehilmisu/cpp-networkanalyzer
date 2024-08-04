@@ -31,19 +31,15 @@ int main()
 {
     std::string dev = NetworkDeviceFinder::getInstance().chooseDevice();
 
-    // Set up logging
     const std::string filename = "packets.pcap";
     Logger::getInstance().setLogFile(filename);
 
-    // Set up monitoring
     FileMonitor fileMonitor(filename);
-    fileMonitor.setPacketFilter("192.168.1.1", "192.168.1.2");
+    //fileMonitor.setPacketFilter("192.168.1.1", "192.168.1.2");
 
-    // Start threads
     std::thread captureThreadObj([&] { captureThread(dev.c_str()); });
     std::thread monitoringThreadObj([&] { fileMonitor.monitor(); });
 
-    // Wait for both threads to complete
     captureThreadObj.join();
     monitoringThreadObj.join();
 

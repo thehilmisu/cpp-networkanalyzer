@@ -6,15 +6,12 @@ Tested on ubuntu and mac os. Should work on windows but did not test on that.
 
 To compile
 
-    ```
-    
-        make all
-        
+    ```bash
+    make all
     ``` 
 To clean
     
     ```
-    
      make clean 
      
     ``` 
@@ -30,9 +27,8 @@ classDiagram
         + FileMonitor(filename: std::string)
         + setPacketFilter(srcIP: std::string, dstIP: std::string)
         + monitor()
-        - print(buffer: const unsigned char*, length: std::size_t)
     }
-    
+
     class Monitor {
         <<abstract>>
         + monitor()
@@ -56,13 +52,27 @@ classDiagram
         + printPackets(interpreter: PcapInterpreter, parsedPacket: PcapFile, isMatch: bool)
         + input(prompt: std::string)
     }
-    
+
     class PcapFile {
         - srcIp: std::string
         - dstIp: std::string
         - protocol: uint8_t
         - length: std::size_t
         - data: std::vector<unsigned char>
+    }
+    
+    class Logger {
+        <<singleton>>
+        + getInstance() : Logger&
+        + log(packet: const unsigned char*, length: std::size_t)
+        + setLogFile(filename: std::string)
+    }
+
+    class NetworkDeviceFinder {
+        <<singleton>>
+        + getInstance() : NetworkDeviceFinder&
+        + chooseDevice() : std::string
+        - listDevices() : std::vector<std::string>
     }
 
     %% Inheritance
@@ -73,6 +83,8 @@ classDiagram
     FileMonitor ..> ConsoleHandler : uses
     PcapInterpreter ..> PcapFile : returns/uses
     ConsoleHandler ..> PcapFile : uses
+    ConsoleHandler ..> PcapInterpreter : uses
+
 
 
 ```
@@ -195,6 +207,8 @@ NetworkDeviceFinder: Ensures there is only one instance of NetworkDeviceFinder.
     - Instead of having filemonitor object directly in the main, we can have interface object for that
 
  - ConsoleHandler can be seperated to have a interface??
+
+ - Observer pattern can be used
 
 
 

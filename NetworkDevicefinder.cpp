@@ -24,7 +24,8 @@ NetworkDeviceFinder& NetworkDeviceFinder::getInstance()
 std::string NetworkDeviceFinder::chooseDevice() 
 {
     std::vector<std::string> devices = listDevices();
-    if (devices.empty()) {
+    if (devices.empty()) 
+    {
         std::cerr << "No network devices found." << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -97,7 +98,7 @@ std::vector<std::string> NetworkDeviceFinder::listDevices()
         }
 
         freeifaddrs(ifaddr);
-        
+
     #endif
 
     return devices;

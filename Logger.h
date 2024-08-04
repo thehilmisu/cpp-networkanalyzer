@@ -19,9 +19,8 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    static Logger *instance;
-    std::ofstream fileStream;
-    std::mutex mtx;
+    std::ofstream m_FileStream;
+    std::mutex m_Mutex;
 };
 
 #endif // LOGGER_H

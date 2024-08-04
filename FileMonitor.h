@@ -9,22 +9,17 @@
 #include <thread>
 #include <chrono>
 #include "PcapInterpreter.h"
-#include "ConsoleHandler.h"
 
 class FileMonitor : public Monitor 
 {
 public:
-    FileMonitor(const std::string& filename)
-        : filename(filename), filePosition(0) {}
-
-    void setPacketFilter(const std::string& srcIp, const std::string& dstIp);
+    FileMonitor(const std::string& filename) : m_Filename(filename), m_FilePosition(0) {}
     void monitor() override ;
 
 private:
-    void print(const unsigned char* buffer, std::size_t length);
-    std::string filename;
-    std::streampos filePosition;
-    PcapInterpreter interpreter;
+    std::string m_Filename;
+    std::streampos m_FilePosition;
+    PcapInterpreter m_Interpreter;
 };
 
 #endif // FILEMONITOR_H

@@ -1,33 +1,25 @@
 #include "FileMonitor.h"
 
-void FileMonitor::setPacketFilter(const std::string& srcIp, const std::string& dstIp)
-{
-    interpreter.setFilter(srcIp, dstIp);
-}
 
 void FileMonitor::monitor()  
 {
     while (true) 
     {
-        std::ifstream fileStream(filename, std::ios::binary | std::ios::ate);
+        std::ifstream fileStream(m_Filename, std::ios::binary | std::ios::ate);
         if (!fileStream.is_open()) 
         {
             throw std::runtime_error("Failed to open file for reading");
         }
 
         std::streampos currentSize = fileStream.tellg();
-        if (currentSize > filePosition) 
+        if (currentSize > m_FilePosition) 
         {
-            fileStream.seekg(filePosition);
-            std::vector<unsigned char> buffer(static_cast<std::size_t>(currentSize - filePosition));
+            fileStream.seekg(m_FilePosition);
+            std::vector<unsigned char> buffer(static_cast<std::size_t>(currentSize - m_FilePosition));
             fileStream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
-            filePosition = fileStream.tellg();
+            m_FilePosition = fileStream.tellg();
 
-            PcapFile parsedPacket = interpreter.interpret(buffer.data(), buffer.size());
-        
-            bool isMatch = interpreter.isMatchedFilter(parsedPacket.srcIp, parsedPacket.dstIp);
-
-            ConsoleHandler::getInstance().printPackets(interpreter, parsedPacket, isMatch);
+            m_Interpreter.interpret(buffer.data(), buffer.size());
         }
 
         fileStream.close();

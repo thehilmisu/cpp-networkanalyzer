@@ -1,8 +1,10 @@
 #include "PcapInterpreter.h"
 
-PcapInterpreter::PcapInterpreter() : filterSrcIp(""), filterDstIp("") 
+PcapInterpreter::PcapInterpreter() : m_FilterSrcIp(""), m_FilterDstIp("") 
 {
-    ipProtocolNumbers = {
+    // got it from wikipedia not a complete list
+    ipProtocolNumbers = 
+    {
         {0, "HOPOPT"},       // IPv6 Hop-by-Hop Option
         {1, "ICMP"},         // Internet Control Message Protocol
         {2, "IGMP"},         // Internet Group Management Protocol
@@ -38,20 +40,19 @@ PcapInterpreter::PcapInterpreter() : filterSrcIp(""), filterDstIp("")
 
 void PcapInterpreter::setFilter(const std::string& srcIp, const std::string& dstIp) 
 {
-    filterSrcIp = srcIp;
-    filterDstIp = dstIp;
+    m_FilterSrcIp = srcIp;
+    m_FilterDstIp = dstIp;
 }
 
 bool PcapInterpreter::isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const 
 {
-    bool srcMatch = filterSrcIp.empty() || filterSrcIp == srcIp;
-    bool dstMatch = filterDstIp.empty() || filterDstIp == dstIp;
+    bool srcMatch = m_FilterSrcIp.empty() || m_FilterSrcIp == srcIp;
+    bool dstMatch = m_FilterDstIp.empty() || m_FilterDstIp == dstIp;
     return srcMatch && dstMatch;
 }
 
 std::string PcapInterpreter::getProtocolName(int protocol_number) 
 {
-    //std::cout << protocol_number << std::endl;
     auto it = ipProtocolNumbers.find(protocol_number);
     if (it != ipProtocolNumbers.end()) 
         return it->second;
@@ -59,25 +60,52 @@ std::string PcapInterpreter::getProtocolName(int protocol_number)
     return "Unknown Protocol";
 }
     
-PcapFile PcapInterpreter::interpret(const unsigned char* packet, std::size_t length) 
+void PcapInterpreter::interpret(const unsigned char* packet, std::size_t length) 
 {
-    PcapFile parsedPacket;
+    PcapFile pFile;
     const struct ip* ipHeader = reinterpret_cast<const struct ip*>(packet);
 
     // Extract source and destination IP addresses
-    parsedPacket.srcIp = inet_ntoa(ipHeader->ip_src);
-    parsedPacket.dstIp = inet_ntoa(ipHeader->ip_dst);
+    pFile.srcIp = inet_ntoa(ipHeader->ip_src);
+    pFile.dstIp = inet_ntoa(ipHeader->ip_dst);
 
     // Extract protocol
-    parsedPacket.protocol = ipHeader->ip_p;
+    pFile.protocol_number = ipHeader->ip_p;
+
+    // Extract protocol name
+    pFile.protocol_name = getProtocolName(ipHeader->ip_p);
 
     // Extract total length
-    parsedPacket.length = ntohs(ipHeader->ip_len);
+    pFile.length = ntohs(ipHeader->ip_len);
 
     // Extract data (payload)
     const unsigned char* dataStart = packet + (ipHeader->ip_hl * 4);
     std::size_t dataLength = length - (ipHeader->ip_hl * 4);
-    parsedPacket.data.assign(dataStart, dataStart + dataLength);
+    pFile.data.assign(dataStart, dataStart + dataLength);
 
-    return parsedPacket;
+    bool isMatch = isMatchedFilter(m_FilterSrcIp, m_FilterDstIp);
+
+    printPackets(pFile, isMatch);
+}
+
+void PcapInterpreter::printPackets(PcapFile parsedFile, bool isMatch)
+{
+    std::ostringstream oss;
+    oss << (isMatch ? "[MATCH] " : "[NO MATCH] ")
+        << "<Source IP: " << parsedFile.srcIp << "> "
+        << "<Destination IP: " << parsedFile.dstIp << "> "
+        << "<Protocol: " << parsedFile.protocol_name << "> "
+        << "<Length: " << parsedFile.length << "> " ;
+    //     << "<Data: ";
+
+    // for (const auto& byte : parsedPacket.data) {
+    //     if (std::isprint(byte)) {
+    //         oss << byte;
+    //     } else {
+    //         oss << '.';
+    //     }
+    // }
+    oss << ">";
+
+    ConsoleHandler::getInstance().print(oss.str());
 }
