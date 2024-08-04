@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <limits>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <winsock2.h>
@@ -16,11 +15,12 @@
     #include <net/if_dl.h>
     #include <net/if.h>
     #include <arpa/inet.h>
+    #include <netdb.h> // Ensure this is included for getnameinfo and NI constants
 #else
     #include <ifaddrs.h>
     #include <netdb.h>
-    #include <netinet/in.h>
     #include <arpa/inet.h>
+    #include <netinet/in.h>
 #endif
 
 class NetworkDeviceFinder 
@@ -35,7 +35,6 @@ private:
     NetworkDeviceFinder(); 
     ~NetworkDeviceFinder();
     std::vector<std::string> listDevices(); 
-    
 };
 
 #endif // NETWORK_DEVICE_FINDER_H
