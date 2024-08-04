@@ -1,29 +1,93 @@
 #include "NetworkDeviceFinder.h"
 
-NetworkDeviceFinder::NetworkDeviceFinder() 
-{
-    #if defined(_WIN32) || defined(_WIN64)
-        WSADATA wsaData;
-        WSAStartup(MAKEWORD(2, 2), &wsaData);
-    #endif
-}
+#if defined(_WIN32) || defined(_WIN64)
+    // Windows-specific includes and code
+    NetworkDeviceFinder::NetworkDeviceFinder() {}
+    NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-NetworkDeviceFinder::~NetworkDeviceFinder() 
-{
-    #if defined(_WIN32) || defined(_WIN64)
-        WSACleanup();
-    #endif
-}
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
+        static NetworkDeviceFinder instance;
+        return instance;
+    }
 
-NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
-{
-    static NetworkDeviceFinder instance;
-    return instance;
-}
+    std::vector<std::string> NetworkDeviceFinder::listDevices() {
+        std::vector<std::string> devices;
+        // Windows-specific code to list network devices
+        // Use GetAdaptersAddresses() or similar API
+        return devices;
+    }
 
-std::string NetworkDeviceFinder::chooseDevice() 
-{
-    std::vector<std::string> devices = listDevices();
+#elif defined(__APPLE__) || defined(__MACH__)
+    // macOS-specific includes and code
+    NetworkDeviceFinder::NetworkDeviceFinder() {}
+    NetworkDeviceFinder::~NetworkDeviceFinder() {}
+
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
+    {
+        static NetworkDeviceFinder instance;
+        return instance;
+    }
+
+    std::vector<std::string> NetworkDeviceFinder::listDevices() 
+    {
+        std::vector<std::string> devices;
+        struct ifaddrs *ifaddr, *ifa;
+        if (getifaddrs(&ifaddr) == -1) {
+            perror("getifaddrs");
+            return devices;
+        }
+
+        for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+            if (ifa->ifa_addr == nullptr) continue;
+
+            if (ifa->ifa_addr->sa_family == AF_INET) { // Check for IPv4
+                char host[NI_MAXHOST];
+                if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST) == 0) {
+                    devices.push_back(ifa->ifa_name);
+                }
+            }
+        }
+
+        freeifaddrs(ifaddr);
+        return devices;
+    }
+
+#else
+    // UNIX-like (Linux) specific code
+    NetworkDeviceFinder::NetworkDeviceFinder() {}
+    NetworkDeviceFinder::~NetworkDeviceFinder() {}
+
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
+    {
+        static NetworkDeviceFinder instance;
+        return instance;
+    }
+
+    std::vector<std::string> NetworkDeviceFinder::listDevices() 
+    {
+        std::vector<std::string> devices;
+        struct ifaddrs *ifaddr, *ifa;
+        if (getifaddrs(&ifaddr) == -1) {
+            perror("getifaddrs");
+            return devices;
+        }
+
+        for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+            if (ifa->ifa_addr == nullptr) continue;
+
+            if (ifa->ifa_addr->sa_family == AF_INET) { // Check for IPv4
+                devices.push_back(ifa->ifa_name);
+            }
+        }
+
+        freeifaddrs(ifaddr);
+        return devices;
+    }
+
+#endif
+
+std::string NetworkDeviceFinder::chooseDevice() {
+std::vector<std::string> devices = listDevices();
     if (devices.empty()) 
     {
         std::cerr << "No network devices found." << std::endl;
@@ -43,63 +107,4 @@ std::string NetworkDeviceFinder::chooseDevice()
     }
 
     return devices[choice - 1];
-}
-
-std::vector<std::string> NetworkDeviceFinder::listDevices() 
-{
-    std::vector<std::string> devices;
-    #if defined(_WIN32) || defined(_WIN64)
-        ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
-        ULONG family = AF_UNSPEC;
-        PIP_ADAPTER_ADDRESSES addresses = nullptr, outAddresses = nullptr;
-        ULONG outBufLen = 15000; // Set an initial buffer size.
-        DWORD dwRetVal = 0;
-
-        do 
-        {
-            addresses = (IP_ADAPTER_ADDRESSES*) new char[outBufLen];
-            dwRetVal = GetAdaptersAddresses(family, flags, nullptr, addresses, &outBufLen);
-            if (dwRetVal == ERROR_BUFFER_OVERFLOW) 
-            {
-                delete[] addresses;
-                addresses = nullptr;
-            } 
-            else 
-            {
-                break;
-            }
-        } while ((dwRetVal == ERROR_BUFFER_OVERFLOW));
-
-        if (dwRetVal == NO_ERROR) 
-        {
-            for (outAddresses = addresses; outAddresses != nullptr; outAddresses = outAddresses->Next) {
-                devices.push_back(std::string(outAddresses->AdapterName));
-            }
-        }
-        if (addresses) 
-        {
-            delete[] addresses;
-        }
-    #else
-        struct ifaddrs *ifaddr, *ifa;
-
-        if (getifaddrs(&ifaddr) == -1) 
-        {
-            perror("getifaddrs");
-            exit(EXIT_FAILURE);
-        }
-
-        for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
-        {
-            if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_PACKET) 
-            {
-                devices.push_back(ifa->ifa_name);
-            }
-        }
-
-        freeifaddrs(ifaddr);
-
-    #endif
-
-    return devices;
 }

@@ -6,7 +6,6 @@
 #include <sstream>
 #include <string>
 
-
 class ConsoleHandler
 {
 public:

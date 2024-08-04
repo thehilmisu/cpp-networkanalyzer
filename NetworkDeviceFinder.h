@@ -1,3 +1,6 @@
+#ifndef NETWORK_DEVICE_FINDER_H
+#define NETWORK_DEVICE_FINDER_H
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -9,6 +12,11 @@
     #include <iphlpapi.h>
     #pragma comment(lib, "iphlpapi.lib")
     #pragma comment(lib, "ws2_32.lib")
+#elif defined(__APPLE__) || defined(__MACH__)
+    #include <ifaddrs.h>
+    #include <net/if_dl.h>
+    #include <net/if.h>
+    #include <arpa/inet.h>
 #else
     #include <ifaddrs.h>
     #include <netdb.h>
@@ -30,3 +38,5 @@ private:
     std::vector<std::string> listDevices(); 
     
 };
+
+#endif // NETWORK_DEVICE_FINDER_H
