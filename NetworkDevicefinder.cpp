@@ -19,17 +19,23 @@
 
 #elif defined(__APPLE__) || defined(__MACH__)
     // macOS-specific includes and code
+    #ifndef NI_MAXHOST
+    #define NI_MAXHOST 1025
+    #endif
+
+    #ifndef NI_NUMERICHOST
+    #define NI_NUMERICHOST 1
+    #endif
+
     NetworkDeviceFinder::NetworkDeviceFinder() {}
     NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
-    {
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
         static NetworkDeviceFinder instance;
         return instance;
     }
 
-    std::vector<std::string> NetworkDeviceFinder::listDevices() 
-    {
+    std::vector<std::string> NetworkDeviceFinder::listDevices() {
         std::vector<std::string> devices;
         struct ifaddrs *ifaddr, *ifa;
         if (getifaddrs(&ifaddr) == -1) {
@@ -57,14 +63,12 @@
     NetworkDeviceFinder::NetworkDeviceFinder() {}
     NetworkDeviceFinder::~NetworkDeviceFinder() {}
 
-    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() 
-    {
+    NetworkDeviceFinder& NetworkDeviceFinder::getInstance() {
         static NetworkDeviceFinder instance;
         return instance;
     }
 
-    std::vector<std::string> NetworkDeviceFinder::listDevices() 
-    {
+    std::vector<std::string> NetworkDeviceFinder::listDevices() {
         std::vector<std::string> devices;
         struct ifaddrs *ifaddr, *ifa;
         if (getifaddrs(&ifaddr) == -1) {
@@ -87,24 +91,11 @@
 #endif
 
 std::string NetworkDeviceFinder::chooseDevice() {
-std::vector<std::string> devices = listDevices();
-    if (devices.empty()) 
-    {
-        std::cerr << "No network devices found." << std::endl;
-        exit(EXIT_FAILURE);
+    std::vector<std::string> devices = listDevices();
+    if (devices.empty()) {
+        return "";
     }
 
-    for (size_t i = 0; i < devices.size(); ++i) 
-    {
-        ConsoleHandler::getInstance().print("[" + std::to_string(i + 1) + "] " + devices[i] );
-    }
-
-    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: "));
-
-    while (choice < 1 || choice > devices.size()) 
-    {
-        choice = std::stoi(ConsoleHandler::getInstance().input("Invalid selection! Please enter a number between 1 and " + std::to_string(devices.size()) + " \n"));
-    }
-
-    return devices[choice - 1];
+    // Assuming the first device is selected for simplicity
+    return devices[0];
 }
