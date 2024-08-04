@@ -35,7 +35,6 @@ int main()
     Logger::getInstance().setLogFile(filename);
 
     FileMonitor fileMonitor(filename);
-    //fileMonitor.setPacketFilter("192.168.1.1", "192.168.1.2");
 
     std::thread captureThreadObj([&] { captureThread(dev.c_str()); });
     std::thread monitoringThreadObj([&] { fileMonitor.monitor(); });

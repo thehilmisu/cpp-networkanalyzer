@@ -94,7 +94,8 @@
         {
             if (ifa->ifa_addr == nullptr) continue;
 
-            if (ifa->ifa_addr->sa_family == AF_INET) { // Check for IPv4
+            if (ifa->ifa_addr->sa_family == AF_INET) // Check for IPv4
+            { 
                 devices.push_back(ifa->ifa_name);
             }
         }
@@ -117,10 +118,10 @@ std::string NetworkDeviceFinder::chooseDevice()
     ConsoleHandler::getInstance().print("Available network devices:\n");
     for (size_t i = 0; i < devices.size(); ++i) 
     {
-        ConsoleHandler::getInstance().print("[" + std::to_string(i+1) + "] " + devices[i]);
+        ConsoleHandler::getInstance().print("[" + std::to_string(i+1) + "] " + devices[i] + "\n");
     }
 
-    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: \n"));
+    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: "));
 
     while (choice < 1 || choice > devices.size()) 
     {
