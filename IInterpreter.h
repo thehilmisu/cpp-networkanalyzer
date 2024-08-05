@@ -1,14 +1,14 @@
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef IINTERPRETER_H
+#define IINTERPRETER_H
 
 #include <cstddef>
 
 template <typename T>
-class Interpreter 
+class IInterpreter 
 {
 public:
     virtual T interpret(const unsigned char* packet, std::size_t length) = 0;
-    virtual ~Interpreter() = default;
+    virtual ~IInterpreter() = default;
 };
 
-#endif // INTERPRETER_H
+#endif // IINTERPRETER_H

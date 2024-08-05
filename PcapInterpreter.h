@@ -8,7 +8,7 @@
 #include <pcap.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
-#include "Interpreter.h"
+#include "IInterpreter.h"
 #include "ConsoleHandler.h"
 
 struct PcapFile 
@@ -21,7 +21,7 @@ struct PcapFile
     std::vector<unsigned char> data;
 };
 
-class PcapInterpreter : public Interpreter<void>
+class PcapInterpreter : public IInterpreter<void>
 {
 public:
     PcapInterpreter();

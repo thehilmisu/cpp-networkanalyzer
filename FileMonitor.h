@@ -1,7 +1,7 @@
 #ifndef FILEMONITOR_H
 #define FILEMONITOR_H
 
-#include "Monitor.h"
+#include "IMonitor.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -10,7 +10,7 @@
 #include <chrono>
 #include "PcapInterpreter.h"
 
-class FileMonitor : public Monitor 
+class FileMonitor : public IMonitor 
 {
 public:
     FileMonitor(const std::string& filename) : m_Filename(filename), m_FilePosition(0) {}
