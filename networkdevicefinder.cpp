@@ -118,12 +118,12 @@ std::string NetworkDeviceFinder::chooseDevice()
     }
 
     ConsoleHandler::getInstance().print("Available network devices:\n");
-    for (size_t i = 0; i < devices.size(); ++i)
+    for (std::size_t i = 0; i < devices.size(); ++i)
     {
         ConsoleHandler::getInstance().print("[" + std::to_string(i+1) + "] " + devices[i] + "\n");
     }
 
-    size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: "));
+    std::size_t choice = std::stoi(ConsoleHandler::getInstance().input("Enter the index of the device you want to use: "));
 
     while (choice < 1 || choice > devices.size())
     {

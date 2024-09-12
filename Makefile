@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall
-LDFLAGS = -lpcap
+LDFLAGS = -lpcap -lncurses
 
 BUILD_DIR = build
 

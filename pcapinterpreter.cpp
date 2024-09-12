@@ -73,7 +73,6 @@ std::string PcapInterpreter::formatPacketData(const std::vector<unsigned char>& 
         oss << "\n";
     }
 
-    //formattedData = QString::fromStdString(oss.str());
     return formattedData;
 }
 

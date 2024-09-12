@@ -1,12 +1,19 @@
 #include "logger.h"
 #include "filemonitor.h"
+#include "networkdevicefinder.h"
 #include <pcap.h>
 #include <thread>
 #include <mutex>
 #include <queue>
 #include <condition_variable>
 #include <iostream>
-#include "networkdevicefinder.h"
+
+#include "ui/TUIManager.h"
+#include "ui/Label.h"
+#include "ui/Button.h"
+#include "ui/TableWidget.h"
+#include "ui/DropdownWidget.h"
+
 
 // Packet handler function for libpcap
 void packetHandler(u_char *userData, const struct pcap_pkthdr *pkthdr, const u_char *packet) 
