@@ -1,11 +1,12 @@
-#include "Logger.h"
-#include "FileMonitor.h"
+#include "logger.h"
+#include "filemonitor.h"
 #include <pcap.h>
 #include <thread>
 #include <mutex>
 #include <queue>
 #include <condition_variable>
-#include "NetworkDeviceFinder.h"
+#include <iostream>
+#include "networkdevicefinder.h"
 
 // Packet handler function for libpcap
 void packetHandler(u_char *userData, const struct pcap_pkthdr *pkthdr, const u_char *packet) 
@@ -34,10 +35,14 @@ int main()
     const std::string filename = "packets.pcap";
     Logger::getInstance().setLogFile(filename);
 
-    FileMonitor fileMonitor(filename);
+    auto interpreter = std::make_unique<PcapInterpreter>();
+
+    FileMonitor &fileMonitor = FileMonitor::getInstance();
+    fileMonitor.setPcapInterpreter(interpreter.get());
+    fileMonitor.setFileName(filename);
 
     std::thread captureThreadObj([&] { captureThread(dev.c_str()); });
-    std::thread monitoringThreadObj([&] { fileMonitor.monitor(); });
+    std::thread monitoringThreadObj([&] { fileMonitor.run(); });
 
     captureThreadObj.join();
     monitoringThreadObj.join();

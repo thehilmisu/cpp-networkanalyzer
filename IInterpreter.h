@@ -4,7 +4,7 @@
 #include <cstddef>
 
 template <typename T>
-class IInterpreter 
+class IInterpreter
 {
 public:
     virtual T interpret(const unsigned char* packet, std::size_t length) = 0;

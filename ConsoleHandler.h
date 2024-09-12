@@ -2,7 +2,6 @@
 #define CONSOLE_HANDLER_H
 
 #include <iostream>
-#include <sstream>
 #include <string>
 
 class ConsoleHandler
@@ -18,11 +17,11 @@ public:
         return instance;
 
     }
-    void print(const std::string& message) 
+    void print(const std::string& message)
     {
         std::cout << message << std::endl;
     }
-    std::string input(const std::string& prompt) 
+    std::string input(const std::string& prompt)
     {
         std::cout << prompt;
         std::string response;
