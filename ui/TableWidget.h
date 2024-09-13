@@ -9,8 +9,8 @@
 
 class TableWidget : public UIElement {
 public:
-    TableWidget(Position pos, std::size_t cols)
-        : position(pos), cols(cols), cellWidth(20), padding(2) {
+    TableWidget(Position pos, int cols, int visibleRows = 10)
+        : position(pos), cols(cols), cellWidth(20), padding(2), visibleRows(visibleRows), scrollOffset(0) {
         selectedRow = 0;
         selectedCol = 0;
     }
@@ -55,9 +55,11 @@ public:
     }
 
     bool handleMouseClick(Position mouse_pos) override {
-        int row = (mouse_pos.y - position.y - 2) / 2;  // Adjust for header row, line, and dashed lines
+        int relativeY = mouse_pos.y - position.y - 2; // Adjust for headers and line
+        int row = relativeY / 2 + scrollOffset;       // Calculate actual row index
         int col = (mouse_pos.x - position.x) / cellWidth;
-        if (row >= 0 && row < content.size() && col >= 0 && col < cols) {
+
+        if (relativeY >= 0 && relativeY < visibleRows * 2 && row >= 0 && row < content.size() && col >= 0 && col < cols) {
             selectedRow = row;
             selectedCol = col;
             draw(true);
@@ -66,14 +68,71 @@ public:
         return false;
     }
 
+    bool handleMouseEvent(const MEVENT& event) override {
+        int mouseX = event.x;
+        int mouseY = event.y;
+
+        int widgetLeft = position.x;
+        int widgetRight = position.x + cols * cellWidth;
+        int widgetTop = position.y;
+        int widgetBottom = position.y + visibleRows * 2 + 2;
+
+        // Handle mouse wheel events (if supported)
+        if (event.bstate & BUTTON4_PRESSED) {
+            // Scroll up
+            scrollBy(-1);
+            draw(true);
+            return true;
+        } else if (event.bstate & BUTTON5_PRESSED) {
+            // Scroll down
+            scrollBy(1);
+            draw(true);
+            return true;
+        }
+
+        if (mouseX >= widgetLeft && mouseX < widgetRight && mouseY >= widgetTop && mouseY <= widgetBottom) {
+        // Proceed to handle the mouse event
+            // Check if click is on the scrollbar
+            int scrollbarX = position.x + cols * cellWidth; // Position of scrollbar
+            if (mouseX == scrollbarX && mouseY >= position.y + 2 && mouseY <= position.y + 2 + visibleRows * 2) {
+                if (event.bstate & BUTTON1_PRESSED) {
+                    handleScrollbarClick(mouseY);
+                    draw(true);
+                    return true;
+                } else if (event.bstate & BUTTON1_RELEASED) {
+                    dragging = false;
+                } else if (dragging && (event.bstate & REPORT_MOUSE_POSITION)) {
+                    handleScrollbarClick(mouseY);
+                    draw(true);
+                    return true;
+                }
+            }
+            return true; // Event was handled
+        }
+
+        
+
+        // Handle clicks within table cells
+        return handleMouseClick({mouseX, mouseY});
+    }
+
+
     void activate() override {
         editItem("Activated");
     }
 
-    void navigate(int dRow, int dCol) {
+    void navigate(int dRow, int dCol = 0) {
         if (!content.empty()) {
             selectedRow = (selectedRow + dRow + content.size()) % content.size();
             selectedCol = (selectedCol + dCol + cols) % cols;
+
+            // Adjust scrollOffset if necessary
+            if (selectedRow < scrollOffset) {
+                scrollOffset = selectedRow;
+            } else if (selectedRow >= scrollOffset + visibleRows) {
+                scrollOffset = selectedRow - visibleRows + 1;
+            }
+
             draw(true);
         }
     }
@@ -87,12 +146,15 @@ public:
 
 private:
     Position position;  // Position in the terminal window
-    std::size_t cols;
+    int cols;
     int cellWidth;
     int padding;
     int selectedRow, selectedCol;
+    int visibleRows;    // Number of rows visible at a time
+    int scrollOffset;   // Index of the first visible row
     std::vector<std::vector<std::string>> content;
     std::vector<std::string> headers;
+    bool dragging = false;
 
     void drawHeaders() const {
         attron(A_REVERSE | COLOR_PAIR(GREEN_ON_BLACK)); // Bold and different color for headers
@@ -107,19 +169,28 @@ private:
     }
 
     void drawCells(bool selected) const {
-        for (std::size_t i = 0; i < content.size(); ++i) {
-            drawCell(i * 2 + 2, i, selected); // Shift by 2 per row to accommodate headers and dashed lines
-            drawDashedLine(i * 2 + 3);        // Draw dashed line after each row
+        int startRow = scrollOffset;
+        int endRow = std::min(scrollOffset + visibleRows, static_cast<int>(content.size()));
+
+        for (int i = startRow; i < endRow; ++i) {
+            int drawRow = (i - scrollOffset) * 2 + 2; // Adjust for headers and lines
+            drawCell(drawRow, i, selected && i == selectedRow);
+            drawDashedLine(drawRow + 1);
+        }
+
+        // Draw scrollbar if content exceeds visible rows
+        if (content.size() > visibleRows) {
+            drawScrollbar();
         }
     }
 
-    void drawCell(int row, int index, bool selected) const {
+    void drawCell(int row, int index, bool isSelected) const {
         for (int col = 0; col < cols; ++col) {
             int x = position.x + col * cellWidth + padding;
             int y = position.y + row;
 
-            if (selected && index == selectedRow) {
-                attron(A_REVERSE | COLOR_PAIR(GREEN_ON_BLACK)); // Highlight selected row
+            if (isSelected && col == selectedCol) {
+                attron(A_REVERSE | COLOR_PAIR(GREEN_ON_BLACK)); // Highlight selected cell
                 mvprintw(y, x, "%-*s", cellWidth - 2 * padding, content[index][col].c_str());
                 attroff(A_REVERSE | COLOR_PAIR(GREEN_ON_BLACK));
             } else {
@@ -137,6 +208,45 @@ private:
                 mvaddch(y, x, '-');
             }
         }
+    }
+
+    void drawScrollbar() const {
+        int scrollbarHeight = visibleRows * 2;
+        int scrollbarX = position.x + cols * cellWidth;
+
+        float ratio = static_cast<float>(visibleRows) / content.size();
+        int thumbSize = std::max(1, static_cast<int>(scrollbarHeight * ratio));
+        float scrollRatio = static_cast<float>(scrollOffset) / (content.size() - visibleRows);
+        int thumbPosition = position.y + 2 + static_cast<int>((scrollbarHeight - thumbSize) * scrollRatio);
+
+        // Draw scrollbar background
+        for (int y = position.y + 2; y < position.y + scrollbarHeight + 2; ++y) {
+            mvaddch(y, scrollbarX, ACS_VLINE);
+        }
+
+        // Draw scrollbar thumb
+        for (int y = thumbPosition; y < thumbPosition + thumbSize; ++y) {
+            mvaddch(y, scrollbarX, ACS_CKBOARD);
+        }
+    }
+
+
+    void handleScrollbarClick(int mouseY) {
+        int scrollbarHeight = visibleRows * 2;
+        int scrollbarTop = position.y + 2;
+
+        int clickPosition = mouseY - scrollbarTop;
+        float clickRatio = static_cast<float>(clickPosition) / scrollbarHeight;
+
+        scrollOffset = static_cast<int>(clickRatio * (content.size() - visibleRows + 1));
+        if (scrollOffset < 0) scrollOffset = 0;
+        if (scrollOffset > content.size() - visibleRows) scrollOffset = content.size() - visibleRows;
+    }
+
+    void scrollBy(int delta) {
+        scrollOffset += delta;
+        if (scrollOffset < 0) scrollOffset = 0;
+        if (scrollOffset > content.size() - visibleRows) scrollOffset = content.size() - visibleRows;
     }
 };
 

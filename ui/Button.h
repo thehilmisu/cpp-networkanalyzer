@@ -2,7 +2,6 @@
 #define BUTTON_H
 
 #include "UIElement.h"
-#include <string>
 #include <functional>
 #include <ncurses.h>
 

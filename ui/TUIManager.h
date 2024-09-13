@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <atomic>
 #include "UIElement.h"
 #include <ncurses.h>
 
@@ -24,26 +25,19 @@ enum ColorPair {
 class TUIManager {
 public:
     template<typename T>
-    void placeElement(std::unique_ptr<T> element, Position pos) {
-        element->setPosition(pos);
+    void placeElement(std::shared_ptr<T> element) {
         element->draw();
-        elements.push_back(std::move(element));
-    }
-
-    template<typename T>
-    void placeElement(std::unique_ptr<T> element) {
-        element->draw();
-        elements.push_back(std::move(element));
+        elements.push_back(element);
     }
 
     void drawUI();
-    void handleInput();
+    void handleInput(std::atomic<bool>& exitFlag);
     void initWindow();
     void endWindow();
 
 private:
-    std::vector<std::unique_ptr<UIElement>> elements;
-    std::size_t selectedElement = 0;
+    std::vector<std::shared_ptr<UIElement>> elements;
+    size_t selectedElement = 0;
     void initializeColorPairs();
     void navigate(int direction);
     void handleMouse();

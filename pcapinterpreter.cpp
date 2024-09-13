@@ -9,9 +9,6 @@
 
 PcapInterpreter::PcapInterpreter()
 {
-    // Register the PcapFile type with Qt's meta-object system
-    //qRegisterMetaType<PcapFile>("PcapFile");
-
 }
 
 void PcapInterpreter::setFilter(const std::string& srcIp, const std::string& dstIp)
@@ -381,7 +378,7 @@ std::string PcapInterpreter::detectLinksAndAPICalls(const std::vector<unsigned c
 }
 
 
-void PcapInterpreter::interpret(const unsigned char* packet, std::size_t length)
+PcapFile PcapInterpreter::interpret(const unsigned char* packet, std::size_t length)
 {
     PcapFile pFile;
     const struct ip* ipHeader = reinterpret_cast<const struct ip*>(packet);
@@ -400,16 +397,17 @@ void PcapInterpreter::interpret(const unsigned char* packet, std::size_t length)
     pFile.length = ntohs(ipHeader->ip_len);
 
     // Extract data (payload)
-    const unsigned char* dataStart = packet + (ipHeader->ip_hl * 4);
-    std::size_t dataLength = length - (ipHeader->ip_hl * 4);
-    pFile.data.assign(dataStart, dataStart + dataLength);
+    // const unsigned char* dataStart = packet + (ipHeader->ip_hl * 4);
+    // std::size_t dataLength = length - (ipHeader->ip_hl * 4);
+    // pFile.data.assign(dataStart, dataStart + dataLength);
 
-    pFile.formattedData = formatPacketDataContinuation(pFile.data);
+    //pFile.formattedData = formatPacketDataContinuation(pFile.data);
 
     //pFile.detectedLinks = detectLinksAndAPICalls(pFile.data);
 
-    pFile.packetLineData = getPacketLineData(pFile.data);
+    //pFile.packetLineData = getPacketLineData(pFile.data);
 
-    ConsoleHandler::getInstance().print(pFile.dstIp);
+    //ConsoleHandler::getInstance().print(pFile.dstIp);
+    return pFile;
 }
 

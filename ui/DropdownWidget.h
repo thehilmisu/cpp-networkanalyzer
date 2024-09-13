@@ -39,7 +39,7 @@ public:
 
         // If dropdown is open, display all options below the selected one
         if (state == DropdownState::Open) {
-            for (std::size_t i = 0; i < options.size(); ++i) {
+            for (size_t i = 0; i < options.size(); ++i) {
                 //if (i == selectedIndex) continue; // Skip the already displayed selected item
                 attron(COLOR_PAIR(color_pair));
                 mvprintw(position.y + i + 1, position.x, "%-*s", cellWidth, options[i].c_str());
@@ -72,6 +72,28 @@ public:
         return false;
     }
 
+bool handleMouseEvent(const MEVENT& event) override {
+    int mouseX = event.x;
+    int mouseY = event.y;
+
+    // Check if the mouse is within the DropdownWidget's bounds
+    int widgetLeft = position.x;
+    int widgetRight = position.x + cellWidth;
+    int widgetTop = position.y;
+    int widgetBottom = position.y + 1; // Height when closed
+
+    if (state == DropdownState::Open) {
+        widgetBottom += options.size(); // Adjust height when open
+    }
+
+    if (mouseX >= widgetLeft && mouseX < widgetRight && mouseY >= widgetTop && mouseY <= widgetBottom) {
+        handleMouseClick({mouseX, mouseY});
+        return true; // Event was handled
+    }
+    return false; // Event was not handled
+}
+
+
     void activate() override {
         state = (state == DropdownState::Closed) ? DropdownState::Open : DropdownState::Closed;
         draw(true);
@@ -88,11 +110,13 @@ public:
         return options[selectedIndex];
     }
 
+    Signal<std::string> onOptionsSelected;
+
 private:
     Position position;
     std::vector<std::string> options;
     DropdownState state;
-    std::size_t selectedIndex;
+    size_t selectedIndex;
     int cellWidth; 
     int color_pair;
     int color_pair_selected;
@@ -120,6 +144,7 @@ private:
         if (optionIndex >= 0 && optionIndex < options.size() && mouse_pos.x >= position.x && mouse_pos.x < position.x + cellWidth) {
             selectedIndex = optionIndex;
             state = DropdownState::OptionSelected;
+            onOptionsSelected.emit(options[selectedIndex]);
             clearDropdownOptions(); // Clear the dropdown area before closing
             state = DropdownState::Closed;
             draw(true);
@@ -132,12 +157,13 @@ private:
 
     void handleOptionSelectedState(Position mouse_pos) {
         clearDropdownOptions(); // Clear the dropdown area before closing
+                
         state = DropdownState::Closed;
         draw(true);
     }
 
     void clearDropdownOptions() const {
-        for (std::size_t i = 0; i < options.size(); ++i) {
+        for (size_t i = 0; i < options.size(); ++i) {
             mvprintw(position.y + i + 1, position.x, "%-*s", cellWidth, ""); // Clear each line
         }
     }

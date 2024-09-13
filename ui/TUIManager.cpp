@@ -2,35 +2,50 @@
 
 
 void TUIManager::drawUI() {
-    for (std::size_t i = 0; i < elements.size(); ++i) {
+    for (size_t i = 0; i < elements.size(); ++i) {
         elements[i]->draw(i == selectedElement);
     }
     refresh();
 }
 
-void TUIManager::handleInput()
-{
-    int ch;
-    while ((ch = getch()) != 'q')
-    {
-        switch (ch)
-        {
-        case KEY_UP:
-            navigate(-1);
-            break;
-        case KEY_DOWN:
-            navigate(1);
-            break;
-        case '\n': // Enter key
-            elements[selectedElement]->activate();
-            break;
-        case KEY_MOUSE:
-            handleMouse();
-            break;
+void TUIManager::handleInput(std::atomic<bool>& exitFlag) {
+    nodelay(stdscr, TRUE);
+    int ch = getch();
+
+    if (ch != ERR) {
+        if (ch == KEY_MOUSE) {
+            MEVENT event;
+            if (getmouse(&event) == OK) {
+                // Loop through elements in reverse order
+                for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
+                    if ((*it)->handleMouseEvent(event)) {
+                        break; // Event was handled
+                    }
+                }
+            }
+        } else {
+            switch (ch) {
+                case KEY_UP:
+                    navigate(-1);
+                    break;
+                case KEY_DOWN:
+                    navigate(1);
+                    break;
+                case '\n':
+                    elements[selectedElement]->activate();
+                    break;
+                case 'q':
+                    exitFlag = true;
+                    break;
+                default:
+                    break;
+            }
         }
         drawUI();
     }
 }
+
+
 
 void TUIManager::initializeColorPairs() {
     
@@ -77,7 +92,7 @@ void TUIManager::handleMouse()
     MEVENT event;
     if (getmouse(&event) == OK)
     {
-        for (std::size_t i = 0; i < elements.size(); ++i)
+        for (size_t i = 0; i < elements.size(); ++i)
         {
             if (elements[i]->handleMouseClick({event.x, event.y}))
             {

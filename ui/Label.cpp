@@ -20,13 +20,15 @@ void Label::draw(bool selected) const
     }
 }
 
-void Label::setPosition(Position pos)
-{
+void Label::setPosition(Position pos) {
     m_pos = pos;
 }
 
-bool Label::handleMouseClick(Position mouse_pos)
-{
+void Label::setText(const std::string &txt) {
+    text = txt;
+}
+
+bool Label::handleMouseClick(Position mouse_pos){
     //std::cout << mouse_pos.x << mouse_pos.y << std::endl;
     return false;
 }

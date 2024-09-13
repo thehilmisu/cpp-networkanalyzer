@@ -10,7 +10,7 @@
 #include "IInterpreter.h"
 #include "pcapfile.h"
 
-class PcapInterpreter : public IInterpreter<void>
+class PcapInterpreter : public IInterpreter<PcapFile>
 {
 
 public:
@@ -18,7 +18,7 @@ public:
     virtual ~PcapInterpreter() = default;
     void setFilter(const std::string& srcIp, const std::string& dstIp);
     bool isMatchedFilter(const std::string& srcIp, const std::string& dstIp) const;
-    void interpret(const unsigned char* packet, std::size_t length) override;
+    PcapFile interpret(const unsigned char* packet, std::size_t length) override;
     std::vector<PacketLineData> getPacketLineData(const std::vector<unsigned char>& data);
 
 private:

@@ -2,7 +2,6 @@
 #define LABEL_H
 
 #include "UIElement.h"
-#include <string>
 #include <ncurses.h>
 
 class Label : public UIElement
@@ -12,6 +11,7 @@ public:
     virtual ~Label() = default;
     void draw(bool selected = false) const override;
     void setPosition(Position pos) override;
+    void setText(const std::string &text) override;
     bool handleMouseClick(Position mouse_pos) override;
     void activate() override;
 

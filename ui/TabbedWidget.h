@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <stdexcept>
 #include "UIElement.h"
 
 class TabbedWidget : public UIElement {
@@ -28,7 +27,7 @@ public:
     }
 
     bool handleMouseClick(Position mouse_pos) override {
-        for (std::size_t i = 0; i < tabs.size(); ++i) {
+        for (size_t i = 0; i < tabs.size(); ++i) {
             int startX = position.x + i * (tabWidth + tabPadding);
             if (mouse_pos.y == position.y && mouse_pos.x >= startX && mouse_pos.x < startX + tabWidth) {
                 selectedTab = i;
@@ -63,13 +62,13 @@ public:
 private:
     Position position;  // Position in the terminal window
     std::vector<std::string> tabs;
-    std::size_t selectedTab;
+    size_t selectedTab;
     int tabWidth = 10; // Fixed width for each tab
     int tabPadding = 2; // Padding between tabs
     std::map<int, std::vector<UIElement*>> tabWidgets; // Widgets for each tab
 
     void drawTabs(bool selected) const {
-        for (std::size_t i = 0; i < tabs.size(); ++i) {
+        for (size_t i = 0; i < tabs.size(); ++i) {
             int startX = position.x + i * (tabWidth + tabPadding);
             if (i == selectedTab) {
                 attron(A_REVERSE | COLOR_PAIR(2)); // Highlight the selected tab
