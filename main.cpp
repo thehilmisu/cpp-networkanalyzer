@@ -14,6 +14,7 @@
 #include "ui/Button.h"
 #include "ui/TableWidget.h"
 #include "ui/DropdownWidget.h"
+#include "ui/Textbox.h"
 #include "ThreadSafeQueue.h"
 
 
@@ -87,6 +88,9 @@ int main()
 
     tuiManager.placeElement(dropDownLabel);
     tuiManager.placeElement(deviceDropdown);
+
+    auto textBox = std::make_shared<TextBox>(Position{0, 2}, 30); // Position at y=2, x=0, width=30
+    tuiManager.placeElement(textBox);
     
     // Main UI loop
     while (!exitFlag) {

@@ -1,5 +1,5 @@
 #include "TUIManager.h"
-
+#include "Textbox.h"
 
 void TUIManager::drawUI() {
     for (size_t i = 0; i < elements.size(); ++i) {
@@ -16,34 +16,45 @@ void TUIManager::handleInput(std::atomic<bool>& exitFlag) {
         if (ch == KEY_MOUSE) {
             MEVENT event;
             if (getmouse(&event) == OK) {
-                // Loop through elements in reverse order
-                for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
-                    if ((*it)->handleMouseEvent(event)) {
-                        break; // Event was handled
+                // Loop through all elements to see if they handle the mouse event
+                for (size_t i = 0; i < elements.size(); ++i) {
+                    if (elements[i]->handleMouseEvent(event)) {
+                        selectedElement = i;
+                        drawUI();
+                        break;
                     }
                 }
             }
         } else {
-            switch (ch) {
-                case KEY_UP:
-                    navigate(-1);
-                    break;
-                case KEY_DOWN:
-                    navigate(1);
-                    break;
-                case '\n':
-                    elements[selectedElement]->activate();
-                    break;
-                case 'q':
-                    exitFlag = true;
-                    break;
-                default:
-                    break;
+            // Pass key presses to the selected element
+            auto activeElement = elements[selectedElement];
+            // Check if the element has a method to handle key presses
+            if (auto textBox = dynamic_cast<TextBox*>(activeElement.get())) {
+                textBox->handleKeyPress(ch);
+            } else {
+                switch (ch) {
+                    case KEY_UP:
+                        navigate(-1);
+                        break;
+                    case KEY_DOWN:
+                        navigate(1);
+                        break;
+                    case '\n':
+                        activeElement->activate();
+                        break;
+                    case 'q':
+                        exitFlag = true;
+                        break;
+                    // Handle other keys
+                    default:
+                        break;
+                }
             }
+            drawUI();
         }
-        drawUI();
     }
 }
+
 
 
 
