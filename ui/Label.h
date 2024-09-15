@@ -9,7 +9,7 @@ class Label : public UIElement
 public:
     Label(const std::string &text, int color_pair, const Position &pos);
     virtual ~Label() = default;
-    void draw(bool selected = false) const override;
+    void draw(bool selected = false) override;
     void setPosition(Position pos) override;
     void setText(const std::string &text) override;
     bool handleMouseClick(Position mouse_pos) override;

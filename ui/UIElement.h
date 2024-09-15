@@ -13,7 +13,7 @@ struct Position {
 class UIElement {
 public:
     virtual ~UIElement() = default;
-    virtual void draw(bool selected = false) const = 0;
+    virtual void draw(bool selected = false)  = 0;
     virtual void setPosition(Position pos) = 0;
     virtual void setText(const std::string& txt) {}
     virtual bool handleMouseClick(Position mouse_pos) = 0;

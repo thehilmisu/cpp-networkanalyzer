@@ -55,9 +55,6 @@ void TUIManager::handleInput(std::atomic<bool>& exitFlag) {
     }
 }
 
-
-
-
 void TUIManager::initializeColorPairs() {
     
     // Define the color pairs

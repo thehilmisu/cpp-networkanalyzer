@@ -23,7 +23,7 @@ public:
         cellWidth = calculateMaxOptionWidth() + 2; // +2 for padding
     }
 
-    void draw(bool selected = false) const override {
+    void draw(bool selected = false) override {
         if (selected) {
             attron(A_REVERSE);
         }

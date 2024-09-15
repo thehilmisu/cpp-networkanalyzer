@@ -12,7 +12,7 @@ public:
         content = "";
     }
 
-    void draw(bool selected = false) const override {
+    void draw(bool selected = false) override {
         attron(COLOR_PAIR(GREEN_ON_WHITE));
         if (selected || isActive) {
             attron(A_REVERSE);

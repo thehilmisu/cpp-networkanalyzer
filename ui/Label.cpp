@@ -5,7 +5,7 @@
 Label::Label(const std::string &text, int color_pair, const Position &pos)
     : text(text), color_pair(color_pair), m_pos(pos) {}
 
-void Label::draw(bool selected) const
+void Label::draw(bool selected) 
 {
     if (selected)
     {

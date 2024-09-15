@@ -22,7 +22,6 @@ std::atomic<bool> exitFlag(false);
 ThreadSafeQueue<PcapFile> packetQueue;
 auto interpreter = std::make_unique<PcapInterpreter>();
 
-// Packet handler function for libpcap
 void packetHandler(u_char *userData, const struct pcap_pkthdr *pkthdr, const u_char *packet) 
 {
     packetQueue.push(interpreter.get()->interpret(packet,sizeof(packet)));
@@ -54,12 +53,11 @@ int main()
     const std::string filename = "packets.pcap";
     Logger::getInstance().setLogFile(filename);
 
-    // Initialize TUIManager
+    // Initialize TUIManager, todo: find another way to do it
     TUIManager tuiManager;
     tuiManager.initWindow();
 
-    // Create UI elements
-    auto packetTable = std::make_shared<TableWidget>(Position{0, 5}, 4, 10); // 4 columns
+    auto packetTable = std::make_shared<TableWidget>(Position{0, 8}, 4, 10); // 4 columns
     packetTable->setHeaders({"Source IP", "Destination IP", "Protocol", "Length"});
 
     tuiManager.placeElement(packetTable);
@@ -84,14 +82,22 @@ int main()
             // Implement logic to handle restarting threads if necessary
             // For example, stop existing threads and start new ones
         }
+        refresh();
     });
 
     tuiManager.placeElement(dropDownLabel);
     tuiManager.placeElement(deviceDropdown);
 
-    auto textBox = std::make_shared<TextBox>(Position{0, 2}, 30); // Position at y=2, x=0, width=30
-    tuiManager.placeElement(textBox);
-    
+
+    //filter ui group
+    auto filterLabel = std::make_shared<Label>("Filter: ",GREEN_ON_BLACK,Position{0, 5}); 
+    auto filterTextBox = std::make_shared<TextBox>(Position{10, 5}, 30); // Position at y=2, x=0, width=30
+    auto applyFilterButton = std::make_shared<Button>("Apply Filter",[]() {  },YELLOW_ON_BLACK,Position{42,5});
+    tuiManager.placeElement(filterTextBox);
+    tuiManager.placeElement(filterLabel);
+    tuiManager.placeElement(applyFilterButton);
+
+
     // Main UI loop
     while (!exitFlag) {
         // Update UI with new packets if necessary

@@ -10,7 +10,7 @@
 class TableWidget : public UIElement {
 public:
     TableWidget(Position pos, int cols, int visibleRows = 10)
-        : position(pos), cols(cols), cellWidth(20), padding(2), visibleRows(visibleRows), scrollOffset(0) {
+        : position(pos), cols(cols), padding(2), visibleRows(visibleRows), scrollOffset(0) {
         selectedRow = 0;
         selectedCol = 0;
     }
@@ -38,13 +38,31 @@ public:
         }
     }
 
+    void removeAllRows(int rowIndex) {
+        content.clear();
+    }
+
     void setItem(int row, int col, const std::string &text) {
         if (row < content.size() && col < cols) {
             content[row][col] = text;
         }
     }
 
-    void draw(bool selected = false) const override {
+    void draw(bool selected = false) override {
+        // Get terminal size
+        int termRows, termCols;
+        getmaxyx(stdscr, termRows, termCols);
+
+        // Calculate total available width for the table
+        int scrollbarWidth = (content.size() > visibleRows) ? 1 : 0; // Space for scrollbar
+        int totalTableWidth = termCols - position.x - scrollbarWidth - 1; // Subtract position and margin
+
+        // Calculate cell width
+        cellWidth = totalTableWidth / cols;
+        if (cellWidth < 5) {
+            cellWidth = 5; // Minimum cell width
+        }
+
         drawHeaders();
         drawCells(selected);
         refresh(); // Refresh the screen after drawing
@@ -110,8 +128,6 @@ public:
             return true; // Event was handled
         }
 
-        
-
         // Handle clicks within table cells
         return handleMouseClick({mouseX, mouseY});
     }
@@ -145,13 +161,13 @@ public:
     }
 
 private:
-    Position position;  // Position in the terminal window
+    Position position;
     int cols;
     int cellWidth;
     int padding;
     int selectedRow, selectedCol;
-    int visibleRows;    // Number of rows visible at a time
-    int scrollOffset;   // Index of the first visible row
+    int visibleRows;
+    int scrollOffset;
     std::vector<std::vector<std::string>> content;
     std::vector<std::string> headers;
     bool dragging = false;
